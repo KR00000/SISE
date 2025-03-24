@@ -124,7 +124,7 @@ def bfs(init_board, target_board, moves_order):
                     current_node = current_node.parent
 
                 end_time = time.time()
-                sum_time = end_time - start_time
+                sum_time = (end_time - start_time) * 1000
                 return {
                     "sciezka": all_moves[::-1],
                     "dlugosc_sciezka": len(path),
@@ -146,7 +146,7 @@ def bfs(init_board, target_board, moves_order):
 
 
 
-def dfs (init_board, target_board, move_order, depth_limit = 36):
+def dfs (init_board, target_board, move_order, depth_limit = 50):
 
     start_time = time.time() # licznik czasu
 
@@ -178,7 +178,7 @@ def dfs (init_board, target_board, move_order, depth_limit = 36):
                 path.append(current_node.move)
                 current_node = current_node.parent
             end_time = time.time()
-            sum_time = end_time - start_time
+            sum_time = (end_time - start_time) * 1000
             return {
                     "sciezka": all_moves[::-1],
                     "dlugosc_sciezka": len(path),
@@ -195,6 +195,8 @@ def dfs (init_board, target_board, move_order, depth_limit = 36):
                     new_node = Node(new_board, find_empty(new_board), current_node, move, current_node.depth + 1)
                     stack.append(new_node)
                     max_depth = max(max_depth, new_node.depth)
+        else:
+            return None
     return None
 
 def astar(init_board, heuristic, move_order):
@@ -220,7 +222,7 @@ def astar(init_board, heuristic, move_order):
                 path.append(current_node.move)
                 current_node = current_node.parent
             end_time = time.time()
-            sum_time = end_time - start_time
+            sum_time = (end_time - start_time) * 1000
             return {
                 "sciezka": path[::-1],
                 "dlugosc_sciezka": len(path),
@@ -265,7 +267,7 @@ def write_stats(filename, solution_length, visited_states, processed_states, max
         file.write(f"{visited_states}\n")
         file.write(f"{processed_states}\n")
         file.write(f"{max_depth}\n")
-        file.write(f"{computation_time:.8f}\n")
+        file.write(f"{computation_time:.3f}\n")
 
 
 def main():

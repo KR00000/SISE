@@ -72,6 +72,7 @@ def next_move(board, empty_pos, moves_order):
 def tuple_board(board):
     return tuple(tuple(row) for row in board)
 
+# liczy ilosc zle umiejscowionych kafelkow
 def hamming_distance(board):
     distance = 0
     for i in range(4):
@@ -80,6 +81,7 @@ def hamming_distance(board):
                 distance += 1
     return distance
 
+# liczy odlegloc od celu
 def manhattan_distance(board):
     distance = 0
     for i in range(4):
@@ -114,7 +116,7 @@ def bfs(init_board, target_board, moves_order):
             visited.add(tuple_board(current_node.board))
             states_counter += 1
 
-            if current_node.move:
+            if current_node.move: # zapisujemy ruch jesli otrzymalismy nowy stan
                 all_moves.append(current_node.move)
 
             if tuple_board(current_node.board) == tuple_board(target_board): # sprawdzamy czy dany stan jest tym oczekiwanym
@@ -126,7 +128,7 @@ def bfs(init_board, target_board, moves_order):
                 end_time = time.time()
                 sum_time = (end_time - start_time) * 1000
                 return {
-                    "sciezka": all_moves[::-1],
+                    "sciezka": path[::-1],
                     "dlugosc_sciezka": len(path),
                     "lso": len(visited),
                     "lsp": states_counter,
@@ -146,16 +148,14 @@ def bfs(init_board, target_board, moves_order):
 
 
 
-def dfs (init_board, target_board, move_order, depth_limit = 50):
+def dfs(init_board, target_board, move_order, depth_limit=22):
+    start_time = time.time()  # licznik czasu
 
-    start_time = time.time() # licznik czasu
-
-    stack = [] # uzywamy stosu do zapisu plansz (LIFO)
+    stack = []  # stos (LIFO)
     visited = set()
     all_moves = []
 
     empty_pos = find_empty(init_board)
-
     starting_point = Node(init_board, empty_pos)  # przechowywanie aktualnego stanu planszy
 
     stack.append(starting_point)
@@ -165,38 +165,41 @@ def dfs (init_board, target_board, move_order, depth_limit = 50):
     max_depth = 0
 
     while stack:
-        current_node = stack.pop()
+        current_node = stack.pop()  # pobieramy ostatni stan
         states_counter += 1
 
         if current_node.move:
             all_moves.append(current_node.move)
 
         if tuple_board(current_node.board) == tuple_board(target_board):
+            # Jesli znaleziono rozwiazanie, budujemy sciezke
             path = []
-
             while current_node.parent is not None:
                 path.append(current_node.move)
                 current_node = current_node.parent
+
             end_time = time.time()
             sum_time = (end_time - start_time) * 1000
             return {
-                    "sciezka": all_moves[::-1],
-                    "dlugosc_sciezka": len(path),
-                    "lso": len(visited),
-                    "lsp": states_counter,
-                    "max_d": max_depth,
-                    "t": sum_time
-                }
-        if current_node.depth < depth_limit: # nie przekaraczamy limitu glebokosci
-            for move , new_board in next_move(current_node.board, current_node.empty_pos, move_order):
+                "sciezka": path[::-1],
+                "dlugosc_sciezka": len(path),
+                "lso": len(visited),
+                "lsp": states_counter,
+                "max_d": max_depth,
+                "t": sum_time
+            }
+
+        # Sprawdzamy czy limit glebokosci nie zostal przekroczony
+        if current_node.depth < depth_limit:
+            for move, new_board in next_move(current_node.board, current_node.empty_pos, move_order):
                 board_tuple = tuple_board(new_board)
-                if board_tuple not in visited: # sprawdzamy czy plansza byla juz "odziedzona"
-                    visited.add(board_tuple)
+                if board_tuple not in visited:
+                    visited.add(board_tuple)  # dodajemy do visited
                     new_node = Node(new_board, find_empty(new_board), current_node, move, current_node.depth + 1)
                     stack.append(new_node)
                     max_depth = max(max_depth, new_node.depth)
-        else:
-            return None
+
+
     return None
 
 def astar(init_board, heuristic, move_order):
